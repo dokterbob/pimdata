@@ -1,4 +1,4 @@
-import sys, couchdb, logging
+import sys, couchdb, logging, time
 from utils import get_csv_reader
 
 
@@ -17,6 +17,7 @@ def import_raw_kvk(csv_file, dbname="raw_kvk"):
     reader = get_csv_reader(csv_file, 'utf-8')
     
     counter = 0
+    start_time = time.time()
     for row in reader:
         # Fieldnames from http://api.openkvk.nl/
         fields = {
@@ -36,9 +37,11 @@ def import_raw_kvk(csv_file, dbname="raw_kvk"):
         counter += 1
         
         if counter % 100 == 0:
-            logger.info('Wrote %d records to database' % counter)
+            logger.info('Wrote %d records to database in %f seconds',
+                        counter, time.time()-start_time)
 
-    logger.info('Wrote %d records to database' % counter)
+    logger.info('Wrote %d records to database in %f seconds', 
+                counter, time.time()-start_time)
 
 
 if __name__ == "__main__":
