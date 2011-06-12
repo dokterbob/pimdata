@@ -18,3 +18,18 @@ db.save(doc)
 
 # from couchdb.client import Document
 # doc = Document()
+
+# Query from the server
+get_john = '''
+function(doc) {
+    if (doc.type == 'person') {
+        emit(doc.name, doc);
+    }
+}
+'''
+res = db.query(get_john)
+
+from IPython.Shell import IPShellEmbed
+ipshell = IPShellEmbed()
+
+ipshell() # this call anywhere in your program will start IPython
