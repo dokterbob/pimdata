@@ -22,6 +22,47 @@ def get_matches(needle, haystack, ratio=0.6):
     return result
 
 
+## VIEWS
+# names/company_names
+# Map:
+# function(doc) {
+#   emit(doc.name, null);
+# }
+# Reduce:
+# function (key, values, rereduce) {
+#     if (rereduce === true) {
+#         return array.concat(key);
+#     } else {
+#   return values;
+#     }
+# }
+
+# names/names
+# Map:
+# function(doc) {
+#   emit(doc.name, doc);
+# }
+
+# names/word_count
+# Map:
+# function(doc) {
+#   regex = new RegExp(/\b(?:a|the|was|\s)+\b/i);
+#         var splitlist = doc.name.split(regex);
+#         var word;
+#         for (var i in splitlist) {
+#             word = splitlist[i];
+# 
+#       if (word.length > 2) {
+#                 emit(word.toLowerCase(), 1);
+#             }
+#         }
+# }
+# Reduce:
+# function (key, values, rereduce) {
+#   return sum(values);
+# }
+
+
 def similar_company_cbp(db_name_in="raw_cbp", db_name_out="raw_cbp_similarities"):
     """ Find similar company names in CBP database """
     couch = couchdb.Server()
@@ -70,14 +111,14 @@ def similar_company_cbp(db_name_in="raw_cbp", db_name_out="raw_cbp_similarities"
 
             doc_id = company['_id']
             try:
-                db_out[doc_id] = matches
+                db_out[doc_id] = new_matches
             except couchdb.http.ResourceConflict:
                 # Update the record
                 logger.info('Found existing object for %s, updating.',
                             doc_id)
 
                 doc = db_out[doc_id]
-                doc.update(matches)
+                doc.update(new_matches)
                 db_out[doc_id] = doc
 
         counter += 1
