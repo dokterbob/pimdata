@@ -6,6 +6,7 @@ Requirements
 * CouchDB
 * CPB data
 * KvK data
+* Python
 
 Reference
 ---------
