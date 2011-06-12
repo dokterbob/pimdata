@@ -16,7 +16,11 @@ def import_raw_cbp(directory, dbname="raw_cbp"):
         data = json.load(open(jsonfile))
         for company in data:
             # Gebruik de url als key
-            db[company["url"]] = company
+            if not company["url"] in db:
+                db[company["url"]] = company
+            else:
+                print "Duplicate data in", jsonfile
+                print "skipping", company["url"]
 
 
 if __name__ == "__main__":
