@@ -48,6 +48,30 @@ def import_raw_cbp(directory, dbname="raw_cbp"):
 
     logger.info('Wrote %d records to database in %f seconds',
                 counter, time.time()-start_time)
+    
+    # Create views
+    db["_design/tagging"] = {
+        "language": "javascript",
+        "views": {
+            "wordfeq": {
+                "map": """
+function(doc) {
+    var wordlist = {};
+    for (var melding in doc.meldingen) {
+        var splitlist = doc.meldingen[melding]["description"].split(" ")
+        for (var i in splitlist) {
+            if (splitlist[i] in wordlist) {
+                wordlist[splitlist[i]] += 1;
+            } else {
+                wordlist[splitlist[i]] = 1;
+            }
+        }
+    }
+    emit(doc.id, wordlist);
+}"""
+            }
+        }
+    }
 
 
 if __name__ == "__main__":
