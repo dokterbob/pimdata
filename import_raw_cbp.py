@@ -2,7 +2,7 @@ import glob, json, os, sys, time, logging
 import couchdb
 
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -24,27 +24,27 @@ def import_raw_cbp(directory, dbname="raw_cbp"):
         logging.debug('Reading %s', jsonfile)
         data = json.load(open(jsonfile))
         for company in data:
-            doc_id = company['url']
-            doc = db.get(doc_id)
+            assert company['url'].startswith('http://www.cbpweb.nl/asp/ORMelding.asp?id=')
+            doc_id = company['url'][42:]
 
-            if doc:
+            try:
+                db[doc_id] = company
+            except couchdb.http.ResourceConflict:
+                # Update the record
                 logger.info('Found existing object for %s, updating.',
                             doc_id)
-                doc.update(company)
-            else:
-                doc = company
 
-            db[doc_id] = doc
+                doc = db[doc_id]
+                doc.update(company)
+                db[doc_id] = doc
 
         counter += 1
 
         if counter % 100 == 0:
-            logger.info('Wrote %d records to database in %f seconds',
-                        counter, time.time()-start_time)
-
-            if counter % 1000 == 0:
-                logger.info('Committing changes.')
-                db.commit()
+            db.commit()
+            t = time.time()-start_time
+            logger.info('Wrote %d records to database in %f seconds (%f/s)',
+                        counter, t, counter/t)
 
     logger.info('Wrote %d records to database in %f seconds',
                 counter, time.time()-start_time)
