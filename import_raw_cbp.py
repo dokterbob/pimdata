@@ -1,4 +1,4 @@
-import glob, json, os
+import glob, json, os, sys
 import couchdb
 
 def import_raw_cbp(directory, dbname="raw_cbp"):
@@ -24,6 +24,12 @@ def import_raw_cbp(directory, dbname="raw_cbp"):
 
 
 if __name__ == "__main__":
-    import_raw_cbp("/home/floort/devel/pim/data")
+    if len(sys.argv) == 2:
+        path = sys.argv[1]
+    else:
+        print 'You monkey!'
+        exit(-1)
+
+    import_raw_cbp(path)
 
 

@@ -20,9 +20,18 @@ db.save(doc)
 # doc = Document()
 
 # Query from the server
-get_john = '''
-function(doc) {
-    if (doc.type == 'person') {
+# get_john = \
+# '''
+# function (doc) {
+#     if (doc.type == 'person' && doc.name.search('Doe') ) {
+#         emit(doc.name, doc);
+#     }
+# }
+# '''
+get_john = \
+'''
+function (doc) {
+    if (doc.type == 'person' && doc.name.search('Doe')) {
         emit(doc.name, doc);
     }
 }
