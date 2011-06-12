@@ -18,10 +18,21 @@ def import_raw_kvk(csv_file, dbname="raw_kvk"):
     reader = get_csv_reader(csv_file, 'utf-8')
 
     counter = 0
+    records = []
     start_time = time.time()
-    for row in reader:
-        records = []
 
+    def commit_records(records, counter):
+        results = db.update(records)
+
+        # Assert there's no errors
+        for result in results:
+            assert not 'error' in result
+
+        t = time.time()-start_time
+        logger.info('Wrote %d records to database in %f seconds (%f/s)',
+                    counter, t, counter/t)
+
+    for row in reader:
         # Fieldnames from http://api.openkvk.nl/
         fields = {
             'kvk': row[0],
@@ -38,15 +49,11 @@ def import_raw_kvk(csv_file, dbname="raw_kvk"):
         records.append(fields)
         counter += 1
 
-        if counter % 100000 == 0:
-            db.update(records)
+        if counter % 10000 == 0:
+            commit_records(records, counter)
+            records = []
 
-            t = time.time()-start_time
-            logger.info('Wrote %d records to database in %f seconds (%f/s)',
-                        counter, t, counter/t)
-
-    logger.info('Wrote %d records to database in %f seconds',
-                counter, time.time()-start_time)
+    commit_records(records, counter)
 
 
 if __name__ == "__main__":
