@@ -15,6 +15,7 @@ def import_raw_cbp(directory, dbname="raw_cbp"):
         print jsonfile
         data = json.load(open(jsonfile))
         for company in data:
+            # Gebruik de url als key
             db[company["url"]] = company
 
 
