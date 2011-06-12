@@ -11,7 +11,8 @@ def import_raw_kvk(csv_file, dbname="raw_kvk"):
     """
     couch = couchdb.Server()
     
-    couch.delete(dbname)
+    if dbname in couch: # Start fresh
+        couch.delete(dbname)
     db = couch.create(dbname)
 
     reader = get_csv_reader(csv_file, 'utf-8')
